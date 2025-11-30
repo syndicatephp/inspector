@@ -8,13 +8,23 @@ use Syndicate\Inspector\DTOs\InspectionContext;
 
 class HttpRequestError implements Check
 {
-    public static function checklist(): string
+    public function apply(InspectionContext $context): CheckResult
+    {
+        return new CheckResult($this, collect());
+    }
+
+    public function getChecklist(): string
     {
         return 'Error';
     }
 
-    public function apply(InspectionContext $context): CheckResult
+    public function getConfig(): array
     {
-        return new CheckResult(collect());
+        return [];
+    }
+
+    public function getName(): string
+    {
+        return 'HTTP Request Error';
     }
 }

@@ -1,0 +1,51 @@
+<?php
+
+namespace App\Syndicate\Inspector\Inspections;
+
+use {{ modelFqn }};
+use Syndicate\Inspector\Checklists;
+use Syndicate\Inspector\Contracts\Check;
+use Syndicate\Inspector\Contracts\Inspection;
+
+class {{ inspectionName }} implements Inspection
+{
+    public function __construct(
+        protected {{ modelName }} $model
+    )
+    {
+    }
+
+    /**
+     * @return class-string<Check>[]
+     */
+    public function checks(): array
+    {
+        return [
+            ...Checklists\BaselineChecklist::checks(),
+            ...Checklists\SeoChecklist::checks(),
+            ...Checklists\PerformanceChecklist::checks(),
+            ...Checklists\ContentChecklist::checks(),
+        ];
+    }
+
+    public function url(): string
+    {
+        return $this->model->link();
+    }
+
+    public function shouldInspect(): bool
+    {
+        return true;
+    }
+
+    public function httpOptions(): array
+    {
+        return [];
+    }
+
+    public function model(): {{ modelName }}
+    {
+        return $this->model;
+    }
+}
+

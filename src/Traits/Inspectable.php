@@ -9,11 +9,14 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\DB;
 use LogicException;
+use RuntimeException;
+use Syndicate\Inspector\Contracts\Inspection;
 use Syndicate\Inspector\DTOs\ModelInspectionReport;
 use Syndicate\Inspector\Enums\RemarkLevel;
 use Syndicate\Inspector\Jobs\InspectionJob;
 use Syndicate\Inspector\Models\Remark;
 use Syndicate\Inspector\Models\Report;
+use Syndicate\Inspector\Services\InspectorService;
 
 /**
  * @mixin Model
@@ -60,21 +63,36 @@ trait Inspectable
         );
     }
 
-    public function queueChecks($user = null): void
+    public function inspect(): void
     {
         if ($this->getKey() === null) {
-            throw new LogicException("Cannot queue checks for a model that has not been persisted yet (missing ID).");
+            throw new LogicException("Cannot perform checks for a non-persisted model.");
         }
 
-        InspectionJob::dispatch(model: $this, user: $user);
+        resolve(InspectorService::class)->inspectModel($this);
     }
 
-    public function runChecksNow($user = null): void
+    public function inspectAsync(): void
     {
         if ($this->getKey() === null) {
-            throw new LogicException("Cannot run checks for a model that has not been persisted yet (missing ID).");
+            throw new LogicException("Cannot queue checks for a non-persisted model.");
         }
 
-        InspectionJob::dispatchSync(model: $this, user: $user);
+        InspectionJob::dispatch($this->inspection());
+    }
+
+    public function inspection(): Inspection
+    {
+        if (property_exists($this, 'inspectionClass')) {
+            return resolve($this->inspectionClass, ['model' => $this]);
+        }
+
+        $guess = 'App\\Syndicate\\Inspector\\Inspections\\' . class_basename($this) . 'Inspection';
+
+        if (class_exists($guess)) {
+            return resolve($guess, ['model' => $this]);
+        }
+
+        throw new RuntimeException("Could not find Inspection for model " . get_class($this));
     }
 }

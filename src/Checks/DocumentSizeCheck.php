@@ -8,6 +8,7 @@ use Throwable;
 
 class DocumentSizeCheck extends BaseCheck
 {
+    protected string $checklist = 'Performance';
     // --- Configuration Properties ---
     protected int $noticeThresholdKb = 250;
     protected int $warningThresholdKb = 500;
@@ -15,11 +16,6 @@ class DocumentSizeCheck extends BaseCheck
     protected RemarkLevel $level = RemarkLevel::WARNING;
 
     // -----------------------------
-
-    public static function checklist(): string
-    {
-        return 'Performance';
-    }
 
     /**
      * Checks the uncompressed size of the response body against configured thresholds.

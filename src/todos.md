@@ -11,3 +11,11 @@
 - Fix Readme
 - v0.1.0
 - Merge migrations into one
+
+
+- Make Checks fluently configurable
+- Intro Checklist interface
+- Make checks return instances not class-strings
+- Readme
+- Intro make:check command
+- Try avoiding check specific interfaces

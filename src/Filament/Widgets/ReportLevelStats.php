@@ -15,7 +15,7 @@ class ReportLevelStats extends StatsOverviewWidget
 
     protected static ?string $pollingInterval = null;
     protected static bool $isLazy = false;
-    protected static string $view = 'syndicate::inspector.widgets.level-stats';
+    protected static string $view = 'inspector::widgets.level-stats';
     protected int|string|array $columnSpan = 'full';
 
     protected function getTablePage(): string
@@ -39,7 +39,7 @@ class ReportLevelStats extends StatsOverviewWidget
         foreach (RemarkLevel::cases() as $level) {
             $figure = $statusCounts->get($level->value, 0);
             $percentage = $total === 0 ? $total : round(($figure / $total) * 100);
-            $stats[] = Stat::make($percentage.'%', $figure)
+            $stats[] = Stat::make($percentage . '%', $figure)
                 ->extraAttributes([
                     'x-tooltip.raw' => $level->getDescription(),
                 ])

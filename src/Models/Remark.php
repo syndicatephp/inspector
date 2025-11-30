@@ -3,6 +3,7 @@
 namespace Syndicate\Inspector\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Syndicate\Inspector\Enums\RemarkLevel;
 
@@ -20,5 +21,10 @@ class Remark extends Model
     public function inspectable(): MorphTo
     {
         return $this->morphTo();
+    }
+
+    public function report(): BelongsTo
+    {
+        return $this->belongsTo(Report::class);
     }
 }

@@ -5,6 +5,7 @@ namespace Syndicate\Inspector;
 use Illuminate\Support\Facades\Event;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
+use Syndicate\Inspector\Commands\MakeInspectionCommand;
 use Syndicate\Inspector\Contracts\Checks\DeterminesExternalLinks;
 use Syndicate\Inspector\Contracts\Checks\DeterminesInternalLinks;
 use Syndicate\Inspector\Events\BulkInspectionCompleted;
@@ -18,10 +19,12 @@ class InspectorServiceProvider extends PackageServiceProvider
     {
         $package
             ->name('inspector')
-            ->hasMigrations('create_inspection_reports_table', 'create_inspection_remarks_table');
+            ->hasViews()
+            ->hasCommand(MakeInspectionCommand::class)
+            ->hasMigrations('create_inspection_tables');
     }
 
-    public function bootingPackage()
+    public function bootingPackage(): void
     {
         Event::listen(
             BulkInspectionCompleted::class,

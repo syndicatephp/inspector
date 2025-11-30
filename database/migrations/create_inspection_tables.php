@@ -10,12 +10,32 @@ return new class extends Migration {
     {
         $severityExpr = $this->levelSeverityCaseExpr();
 
+        Schema::create('inspection_reports', function (Blueprint $table) use ($severityExpr) {
+            $table->id();
+
+            $table->nullableMorphs('inspectable', 'inspectable_report_index');
+            $table->string('url')->index();
+
+            $table->string('level')->index();
+            $table->json('finding_counts')->nullable();
+            $table->json('check_counts')->nullable();
+
+            $table->unsignedSmallInteger('level_severity')->storedAs($severityExpr);
+            $table->index('level_severity', 'inspection_report_severity_idx');
+
+            $table->timestamps();
+        });
+
         Schema::create('inspection_remarks', function (Blueprint $table) use ($severityExpr) {
             $table->id();
 
-            $table->morphs('inspectable', 'inspectable_index');
+            $table->foreignId('inspection_report_id')
+                ->constrained('inspection_reports')
+                ->cascadeOnDelete();
 
-            $table->string('url');
+            $table->nullableMorphs('inspectable', 'inspectable_remark_index');
+            $table->string('url')->index();
+
             $table->string('level')->index();
             $table->string('check')->index();
             $table->string('checklist')->index();
@@ -25,7 +45,7 @@ return new class extends Migration {
             $table->json('config')->nullable();
 
             $table->unsignedSmallInteger('level_severity')->storedAs($severityExpr);
-            $table->index('level_severity', 'sir_level_severity_idx');
+            $table->index('level_severity', 'inspection_remark_severity_idx');
 
             $table->timestamps();
         });
@@ -42,11 +62,12 @@ return new class extends Migration {
             RemarkLevel::cases()
         );
 
-        return 'CASE level '.implode(' ', $parts).' ELSE 0 END';
+        return 'CASE level ' . implode(' ', $parts) . ' ELSE 0 END';
     }
 
     public function down(): void
     {
         Schema::dropIfExists('inspection_remarks');
+        Schema::dropIfExists('inspection_reports');
     }
 };

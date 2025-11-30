@@ -9,16 +9,12 @@ use Throwable;
 
 class EnforceHttpsCheck extends BaseCheck
 {
+    protected string $checklist = 'Baseline';
     // --- Configuration Properties ---
     protected RemarkLevel $pageInsecureLevel = RemarkLevel::ERROR;
     protected RemarkLevel $linkInsecureLevel = RemarkLevel::ERROR;
 
     // -----------------------------
-
-    public static function checklist(): string
-    {
-        return 'Baseline';
-    }
 
     /**
      * Ensures the page itself and all navigational links are served over HTTPS.

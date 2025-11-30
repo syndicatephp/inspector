@@ -7,6 +7,7 @@ use Syndicate\Inspector\Enums\RemarkLevel;
 
 class StatusCodeCheck extends BaseCheck
 {
+    protected string $checklist = 'Baseline';
     // --- Configuration Properties ---
     protected RemarkLevel $redirectLevel = RemarkLevel::WARNING;
     protected RemarkLevel $clientErrorLevel = RemarkLevel::ERROR;
@@ -14,11 +15,6 @@ class StatusCodeCheck extends BaseCheck
     protected RemarkLevel $unexpectedStatusLevel = RemarkLevel::ERROR;
 
     // -----------------------------
-
-    public static function checklist(): string
-    {
-        return 'Baseline';
-    }
 
     /**
      * Checks the HTTP status code of the response.

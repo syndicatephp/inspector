@@ -8,17 +8,13 @@ use Throwable;
 
 class CanonicalUrlCheck extends BaseCheck
 {
+    protected string $checklist = 'SEO';
     // --- Configuration Properties ---
     protected RemarkLevel $missingLevel = RemarkLevel::WARNING;
     protected RemarkLevel $multipleLevel = RemarkLevel::ERROR;
     protected RemarkLevel $invalidUrlLevel = RemarkLevel::ERROR;
 
     // -----------------------------
-
-    public static function checklist(): string
-    {
-        return 'SEO';
-    }
 
     /**
      * Checks for the presence and validity of the canonical link tag.

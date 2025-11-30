@@ -8,6 +8,7 @@ use Throwable;
 
 class TitleCheck extends BaseCheck
 {
+    protected string $checklist = 'Baseline';
     // --- Configuration Properties ---
     protected ?int $minTitleLength = 10;
     protected ?int $maxTitleLength = 60;
@@ -18,11 +19,6 @@ class TitleCheck extends BaseCheck
     protected RemarkLevel $multipleLevel = RemarkLevel::ERROR;
 
     // -----------------------------
-
-    public static function checklist(): string
-    {
-        return 'Baseline';
-    }
 
     /**
      * Check for the presence, uniqueness, and quality of the <title> tag.

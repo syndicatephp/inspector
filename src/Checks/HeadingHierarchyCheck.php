@@ -8,15 +8,11 @@ use Throwable;
 
 class HeadingHierarchyCheck extends BaseCheck
 {
+    protected string $checklist = 'Content';
     // --- Configuration Properties ---
     protected RemarkLevel $level = RemarkLevel::WARNING;
 
     // -----------------------------
-
-    public static function checklist(): string
-    {
-        return 'Content';
-    }
 
     /**
      * Checks if heading tags (h1-h6) follow a logical hierarchy.

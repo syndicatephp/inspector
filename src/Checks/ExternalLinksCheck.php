@@ -14,16 +14,12 @@ use Throwable;
 
 class ExternalLinksCheck extends BaseCheck
 {
+    protected string $checklist = 'Content';
     // --- Configuration Properties ---
     protected RemarkLevel $level = RemarkLevel::WARNING;
     protected int $timeout = 5;
 
     // -----------------------------
-
-    public static function checklist(): string
-    {
-        return 'Content';
-    }
 
     /**
      * Checks all external links on the page for 4xx or 5xx status codes.

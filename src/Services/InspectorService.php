@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Http;
+use LogicException;
 use Syndicate\Inspector\Checks\HttpRequestError;
 use Syndicate\Inspector\Contracts\Check;
 use Syndicate\Inspector\Contracts\Inspection;
@@ -13,170 +14,128 @@ use Syndicate\Inspector\DTOs\CheckResult;
 use Syndicate\Inspector\DTOs\Finding;
 use Syndicate\Inspector\DTOs\InspectionContext;
 use Syndicate\Inspector\DTOs\InspectionReport;
-use Syndicate\Inspector\DTOs\LevelCounts;
-use Syndicate\Inspector\Enums\RemarkLevel;
 use Syndicate\Inspector\Events\InspectionCompleted;
-use Syndicate\Inspector\Models\Remark;
+use Syndicate\Inspector\Inspections\UrlInspection;
 use Syndicate\Inspector\Models\Report;
 use Throwable;
 
 class InspectorService
 {
-    public function inspect(Model $model): void
+    public function inspectModel(Model $model): void
     {
-        $this->runAndReport($this->inspectionFor($model));
+        if (!method_exists($model, 'inspection')) {
+            throw new LogicException("Model must use Inspectable trait");
+        }
+
+        $this->runAndRecord($model->inspection());
     }
 
-    public function runAndReport(Inspection $inspection): void
+    public function runAndRecord(Inspection $inspection): void
     {
         $report = $this->run($inspection);
-        $this->record($report);
+
+        if ($report)
+            $this->record($report);
     }
 
-    public function run(Inspection $inspection): InspectionReport
+    public function run(Inspection $inspection): ?InspectionReport
     {
+        if (!$inspection->shouldInspect()) return null;
+
         $url = $inspection->url();
         $httpOptions = $inspection->httpOptions();
         $checks = $inspection->checks();
-        $findings = new Collection();
+        $results = new Collection();
 
-        // 1. Make the HTTP request to get the Response object.
         try {
             $response = Http::withOptions($httpOptions)->get($url);
         } catch (Throwable $e) {
-            $httpFinding = Finding::fatal('HTTP request failed: ' . $e->getMessage(), HttpRequestError::class, $url);
-            return new InspectionReport($inspection, collect([$httpFinding]));
+            $httpFinding = Finding::fatal('HTTP request failed: ' . $e->getMessage());
+            $result = new CheckResult(new HttpRequestError(), collect([$httpFinding]));
+            return new InspectionReport($inspection, collect([$result]));
         }
 
-        // 2. Create the context for this inspection run.
         $context = InspectionContext::make($inspection, $response);
 
-        // 3. Execute each check against the context.
-        foreach ($checks as $checkClass) {
-            $checkResult = $this->runCheck($checkClass, $context);
-            $findings = $findings->merge($checkResult->findings);
+        foreach ($checks as $check) {
+            $checkResult = $this->runCheck($check, $context);
+            $results = $results->add($checkResult);
         }
 
-        $report = new InspectionReport($inspection, $findings);
+        $report = new InspectionReport($inspection, $results);
 
         Event::dispatch(new InspectionCompleted($report));
 
         return $report;
     }
 
-    /**
-     * @param class-string<Check> $checkClass
-     * @param InspectionContext $context
-     * @return CheckResult
-     */
-    private function runCheck(string $checkClass, InspectionContext $context): CheckResult
+    private function runCheck(Check $check, InspectionContext $context): CheckResult
     {
         try {
-            /** @var Check $check */
-            $check = resolve($checkClass);
             return $check->apply($context);
         } catch (Throwable $e) {
             $finding = Finding::fatal(
-                "Check execution failed: " . $e->getMessage(),
-                $checkClass,
-                $context->inspection->url(),
+                message: "Check execution failed: " . $e->getMessage(),
                 details: ['exception' => get_class($e)]
             );
-            return new CheckResult(new Collection([$finding]));
+            return new CheckResult($check, new Collection([$finding]));
         }
     }
 
-    public function record(InspectionReport $report): void
+    public function record(InspectionReport $reportDTO): void
     {
-        $inspectable = $report->inspection->model();
+        $dbReport = $this->createInspectionReport($reportDTO);
 
-        Remark::query()
-            ->where('inspectable_type', $inspectable->getMorphClass())
-            ->where('inspectable_id', $inspectable->getKey())
-            ->delete();
+        $dbReport->remarks()->delete();
 
-        // 4. Persist each new finding as a Remark.
-        foreach ($report->findings as $finding) {
-            $this->createInspectionRemark($inspectable, $finding);
+        foreach ($reportDTO->results as $result) {
+            $this->createInspectionRemark($dbReport, $result);
         }
-
-        // 5. Calculate and persist the final summary report.
-        $this->createInspectionReport($inspectable, $report->findings);
     }
 
-    private function createInspectionRemark(Model $inspectable, Finding $finding): void
+    private function createInspectionReport(InspectionReport $reportDTO): Report
     {
-        Remark::query()
-            ->create([
-                'inspectable_type' => $inspectable->getMorphClass(),
-                'inspectable_id' => $inspectable->getKey(),
-                'level' => $finding->level,
-                'message' => $finding->message,
-                'check' => class_basename($finding->checkClass),
-                'url' => $finding->url,
-                'checklist' => $finding->checkClass::checklist(),
-                'config' => $finding->config,
-                'details' => $finding->details,
-            ]);
-    }
+        $model = $reportDTO->inspection->model();
+        $url = $reportDTO->inspection->url();
 
-    private function createInspectionReport(Model $inspectable, Collection $findings): void
-    {
-        // Calculate overall status
-        $overallStatus = RemarkLevel::SUCCESS;
-        foreach ($findings as $finding) {
-            if ($finding->level->getSeverity() > $overallStatus->getSeverity()) {
-                $overallStatus = $finding->level;
-            }
-        }
-
-        // Calculate counts per level for all findings
-        $findingLevelCounts = $findings->countBy(fn(Finding $dto) => $dto->level->value)->all();
-        $findingCountsDto = LevelCounts::fromArray($findingLevelCounts);
-
-        // Calculate counts per level for checks (most severe)
-        $checkLevelCounts = $findings
-            ->groupBy('checkName')
-            ->map(function (Collection $findingsForCheck) {
-                $mostSevere = RemarkLevel::SUCCESS;
-                foreach ($findingsForCheck as $finding) {
-                    if ($finding->level->getSeverity() > $mostSevere->getSeverity()) {
-                        $mostSevere = $finding->level;
-                    }
-                }
-                return $mostSevere->value;
-            })
-            ->countBy()
-            ->all();
-        $checkCountsDto = LevelCounts::fromArray($checkLevelCounts);
-
-        Report::updateOrCreate(
+        return Report::updateOrCreate(
+            $model
+                ? ['inspectable_type' => $model->getMorphClass(), 'inspectable_id' => $model->getKey()]
+                : ['inspectable_type' => null, 'inspectable_id' => null, 'url' => $url],
             [
-                'inspectable_id' => $inspectable->getKey(),
-                'inspectable_type' => $inspectable->getMorphClass(),
-            ],
-            [
-                'level' => $overallStatus,
-                'finding_counts' => $findingCountsDto,
-                'check_counts' => $checkCountsDto,
+                'level' => $reportDTO->status, // Calculated in DTO
+                'finding_counts' => $reportDTO->findingCounts, // Calculated in DTO
+                'check_counts' => $reportDTO->checkCounts, // Calculated in DTO
+                'url' => $url,
             ]
         );
     }
 
-    public function inspectionFor(Model $model): Inspection
+    private function createInspectionRemark(Report $report, CheckResult $result): void
     {
-        if (property_exists($model, 'inspectionDefinition')) {
-            return resolve($model::$inspectionDefinition, [
-                'model' => $model,
+        foreach ($result->findings as $finding) {
+            /** @var Finding $finding */
+            $report->remarks()->create([
+                // Report Data
+                'inspectable_type' => $report->inspectable_type,
+                'inspectable_id' => $report->inspectable_id,
+                'url' => $report->url,
+
+                // Finding Data
+                'level' => $finding->level,
+                'message' => $finding->message,
+                'details' => $finding->details,
+
+                // Check Data
+                'check' => $result->check->getName(),
+                'checklist' => $result->check->getChecklist(),
+                'config' => $result->check->getConfig(),
             ]);
         }
+    }
 
-        if (method_exists($model, 'inspection')) {
-            return $model->inspection();
-        }
-
-        return resolve('App\\Syndicate\\Inspector\\Inspections\\' . class_basename($model) . 'Inspection', [
-            'model' => $model,
-        ]);
+    public function inspectUrl(string $url): void
+    {
+        $this->runAndRecord(new UrlInspection($url));
     }
 }

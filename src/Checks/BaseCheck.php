@@ -14,6 +14,30 @@ use Syndicate\Inspector\Enums\RemarkLevel;
 abstract class BaseCheck implements Check
 {
     protected ?InspectionContext $context = null;
+    protected string $checklist = 'Misc';
+    protected string|null $nameOverride = null;
+
+    public static function make(): self
+    {
+        return new static();
+    }
+
+    public function checklist(string $checklist): self
+    {
+        $this->checklist = $checklist;
+        return $this;
+    }
+
+    public function getChecklist(): string
+    {
+        return $this->checklist;
+    }
+
+    public function name(string $name): self
+    {
+        $this->nameOverride = $name;
+        return $this;
+    }
 
     final public function apply(InspectionContext $context): CheckResult
     {
@@ -28,6 +52,31 @@ abstract class BaseCheck implements Check
 
     abstract protected function applyCheck(): CheckResult;
 
+    /**
+     * @return array<string, mixed>
+     */
+    public function getConfig(): array
+    {
+        $config = [];
+        $reflection = new ReflectionClass($this);
+
+        $properties = $reflection->getProperties(ReflectionProperty::IS_PROTECTED);
+
+        foreach ($properties as $property) {
+            if ($property->isStatic() || !$property->isInitialized($this) || $property->getName() === 'context') {
+                continue;
+            }
+            $config[$property->getName()] = $property->getValue($this);
+        }
+
+        return $config;
+    }
+
+    public function getName(): string
+    {
+        return $this->nameOverride ?? class_basename($this);
+    }
+
     protected function success(string $message, ?array $details = null): CheckResult
     {
         return $this->result([
@@ -37,7 +86,7 @@ abstract class BaseCheck implements Check
 
     protected function result(array $findings): CheckResult
     {
-        return CheckResult::from($findings);
+        return new CheckResult($this, collect($findings));
     }
 
     protected function finding(
@@ -53,31 +102,8 @@ abstract class BaseCheck implements Check
         return new Finding(
             level: $level,
             message: $message,
-            checkClass: static::class,
-            url: $this->context->inspection->url(),
-            config: $this->getConfig(),
             details: $details
         );
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    protected function getConfig(): array
-    {
-        $config = [];
-        $reflection = new ReflectionClass($this);
-
-        $properties = $reflection->getProperties(ReflectionProperty::IS_PROTECTED);
-
-        foreach ($properties as $property) {
-            if ($property->isStatic() || !$property->isInitialized($this) || $property->getName() === 'context') {
-                continue;
-            }
-            $config[$property->getName()] = $property->getValue($this);
-        }
-
-        return $config;
     }
 
     protected function info(string $message, ?array $details = null): CheckResult

@@ -11,15 +11,11 @@ use Throwable;
 
 class InternalLinksCheck extends BaseCheck
 {
+    protected string $checklist = 'Content';
     // --- Configuration Properties ---
     protected RemarkLevel $level = RemarkLevel::ERROR;
 
     // -----------------------------
-
-    public static function checklist(): string
-    {
-        return 'Content';
-    }
 
     /**
      * Checks all internal links on the page for 4xx or 5xx status codes.

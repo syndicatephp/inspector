@@ -9,6 +9,7 @@ use Throwable;
 
 class ImageIntegrityCheck extends BaseCheck
 {
+    protected string $checklist = 'Content';
     // --- Configuration Properties ---
     protected bool $excludeJsSrc = true;
     protected bool $flagEmptyAlt = true;
@@ -17,11 +18,6 @@ class ImageIntegrityCheck extends BaseCheck
     protected RemarkLevel $emptyAltLevel = RemarkLevel::WARNING;
 
     // -----------------------------
-
-    public static function checklist(): string
-    {
-        return 'Content';
-    }
 
     /**
      * Check if <img> tags have appropriate alt attributes.

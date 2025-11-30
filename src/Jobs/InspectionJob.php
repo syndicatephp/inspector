@@ -25,10 +25,6 @@ class InspectionJob implements ShouldQueue
 
     public function handle(InspectorService $inspectorService): void
     {
-        if (!$this->inspection->shouldInspect()) {
-            return;
-        }
-
-        $inspectorService->inspect($this->inspection);
+        $inspectorService->runAndRecord($this->inspection);
     }
 }

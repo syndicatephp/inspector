@@ -7,7 +7,11 @@ use Syndicate\Inspector\DTOs\InspectionContext;
 
 interface Check
 {
+    public function getChecklist(): string;
+
     public function apply(InspectionContext $context): CheckResult;
 
-    public static function checklist(): string;
+    public function getConfig(): array;
+
+    public function getName(): string;
 }

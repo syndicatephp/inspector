@@ -41,12 +41,12 @@ class RemarkDetails extends Section
 
             ViewEntry::make('details')
                 ->label('Detailed Information')
-                ->view('syndicate::inspector.infolists.details')
+                ->view('inspector::infolists.details')
                 ->columnSpanFull(),
 
             ViewEntry::make('config')
                 ->label('Check Configuration')
-                ->view('syndicate::inspector.infolists.configuration')
+                ->view('inspector::infolists.config')
                 ->columnSpanFull(),
         ]);
     }

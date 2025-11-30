@@ -9,7 +9,7 @@ class DefaultExternalLinkDeterminer implements DeterminesExternalLinks
 {
     public function isExternal(string $href, InspectionContext $context): bool
     {
-        $currentHost = parse_url($context->url, PHP_URL_HOST);
+        $currentHost = parse_url($context->inspection->url(), PHP_URL_HOST);
 
         if (empty($href) || empty($currentHost)) {
             return false;

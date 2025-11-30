@@ -3,6 +3,7 @@
 namespace Syndicate\Inspector\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Syndicate\Inspector\Casts\AsLevelCounts;
 use Syndicate\Inspector\Enums\RemarkLevel;
@@ -22,5 +23,10 @@ class Report extends Model
     public function inspectable(): MorphTo
     {
         return $this->morphTo();
+    }
+
+    public function remarks(): HasMany
+    {
+        return $this->hasMany(Remark::class, 'inspection_report_id');
     }
 }

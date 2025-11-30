@@ -2,10 +2,8 @@
 
 namespace Syndicate\Inspector\Filament\Tables\Filters;
 
-use Filament\Facades\Filament;
 use Filament\Tables\Filters\SelectFilter;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use Syndicate\Inspector\Filament\InspectorPlugin;
+use Filament\Tables\Table;
 
 class InspectableFilter extends SelectFilter
 {
@@ -19,28 +17,10 @@ class InspectableFilter extends SelectFilter
         parent::setUp();
 
         $this
-            ->options($this->getInspectableTypesArr())
-            ->label('Inspectable');
-    }
-
-    protected function getInspectableTypesArr(): array
-    {
-        $currentPanel = Filament::getCurrentPanel();
-        $plugin = null;
-
-        if ($currentPanel && $currentPanel->hasPlugin('syndicate-inspector')) {
-            $plugin = $currentPanel->getPlugin('syndicate-inspector');
-        }
-
-        /** @var ?InspectorPlugin $plugin */
-        $checkableTypes = $plugin?->getInspectableTypes() ?? [];
-
-        if (empty($checkableTypes)) {
-            return [];
-        }
-
-        return collect($checkableTypes)->mapWithKeys(function ($value, $key) {
-            return [Relation::getMorphAlias($value) => class_basename($value)];
-        })->toArray();
+            ->label('Inspectable')
+            ->searchable()
+            ->options(function (Table $table): array {
+                return $table->getQuery()->distinct()->pluck('inspectable_type')->toArray();
+            });
     }
 }

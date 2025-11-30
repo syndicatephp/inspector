@@ -8,14 +8,16 @@ use Throwable;
 
 class TransferStatsLogCheck extends BaseCheck
 {
+    protected string $checklist = 'Performance';
     // --- Configuration Properties ---
     protected RemarkLevel $level = RemarkLevel::INFO;
 
     // -----------------------------
 
-    public static function checklist(): string
+    public function level(RemarkLevel $level): static
     {
-        return 'Performance';
+        $this->level = $level;
+        return $this;
     }
 
     /**

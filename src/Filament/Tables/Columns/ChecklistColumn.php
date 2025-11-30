@@ -19,7 +19,7 @@ class ChecklistColumn extends TextColumn
             ->searchable()
             ->badge()
             ->formatStateUsing(function ($record): string {
-                return str(class_basename($record->checklist))->before('Checklist')->headline()->toString();
+                return str(class_basename($record->checklist))->before('Checklist')->toString();
             })
             ->color('info')
             ->sortable();

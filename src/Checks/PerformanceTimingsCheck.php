@@ -8,6 +8,7 @@ use Throwable;
 
 class PerformanceTimingsCheck extends BaseCheck
 {
+    protected string $checklist = 'Performance';
     // --- Configuration Properties ---
     protected int $dnsWarningMs = 100;
     protected int $tcpConnectionWarningMs = 100;
@@ -20,11 +21,6 @@ class PerformanceTimingsCheck extends BaseCheck
     protected RemarkLevel $level = RemarkLevel::WARNING;
 
     // -----------------------------
-
-    public static function checklist(): string
-    {
-        return 'Performance';
-    }
 
     /**
      * Analyzes the different phases of the HTTP request for performance bottlenecks.

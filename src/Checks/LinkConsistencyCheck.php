@@ -10,6 +10,7 @@ use Throwable;
 
 class LinkConsistencyCheck extends BaseCheck
 {
+    protected string $checklist = 'Baseline';
     // --- Configuration Properties ---
     protected RemarkLevel $level = RemarkLevel::WARNING;
     /** @var string[] File extensions to ignore when checking for trailing slashes. */
@@ -20,11 +21,6 @@ class LinkConsistencyCheck extends BaseCheck
     ];
 
     // -----------------------------
-
-    public static function checklist(): string
-    {
-        return 'Baseline';
-    }
 
     /**
      * Checks for consistent use of trailing slashes on internal links.

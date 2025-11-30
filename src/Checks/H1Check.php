@@ -8,6 +8,7 @@ use Throwable;
 
 class H1Check extends BaseCheck
 {
+    protected string $checklist = 'Content';
     // --- Configuration Properties ---
     protected ?int $maxHeadingLength = 70;
     protected ?int $minHeadingLength = 20;
@@ -18,11 +19,6 @@ class H1Check extends BaseCheck
     protected RemarkLevel $missingEmptyLevel = RemarkLevel::ERROR;
 
     // -----------------------------
-
-    public static function checklist(): string
-    {
-        return 'Content';
-    }
 
     /**
      * Check for the presence, uniqueness, and basic quality of the <h1> tag.

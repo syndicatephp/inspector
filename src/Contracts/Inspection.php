@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 interface Inspection
 {
     /**
-     * @return class-string<Check>[]
+     * @return Check[]
      */
     public function checks(): array;
 

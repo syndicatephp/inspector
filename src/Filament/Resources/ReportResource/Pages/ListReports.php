@@ -2,25 +2,24 @@
 
 namespace Syndicate\Inspector\Filament\Resources\ReportResource\Pages;
 
+use Filament\Actions\Action;
 use Filament\Facades\Filament;
+use Filament\Forms\Components\TextInput;
 use Filament\Pages\Concerns\ExposesTableToWidgets;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Syndicate\Assistant\Enums\FilamentPageType;
-use Syndicate\Assistant\Filament\Tables\Columns\UpdatedAtColumn;
-use Syndicate\Carpenter\Filament\Tables\Columns\MorphModelColumn;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Syndicate\Inspector\Filament\Actions\BulkInspectModelAction;
 use Syndicate\Inspector\Filament\InspectorPlugin;
 use Syndicate\Inspector\Filament\Resources\ReportResource;
 use Syndicate\Inspector\Filament\Tables\Actions\InspectRecordAction;
 use Syndicate\Inspector\Filament\Tables\Actions\InspectRecordsBulkAction;
 use Syndicate\Inspector\Filament\Tables\Columns\LevelColumn;
-use Syndicate\Inspector\Filament\Tables\Filters\InspectableFilter;
-use Syndicate\Inspector\Filament\Tables\Filters\LevelFilter;
 use Syndicate\Inspector\Filament\Widgets\ReportLevelStats;
 use Syndicate\Inspector\Models\Report;
+use Syndicate\Inspector\Services\InspectorService;
 
 class ListReports extends ListRecords
 {
@@ -31,8 +30,8 @@ class ListReports extends ListRecords
         $currentPanel = Filament::getCurrentPanel();
         $plugin = null;
 
-        if ($currentPanel && $currentPanel->hasPlugin('syndicate-inspector')) {
-            $plugin = $currentPanel->getPlugin('syndicate-inspector');
+        if ($currentPanel && $currentPanel->hasPlugin('inspector')) {
+            $plugin = $currentPanel->getPlugin('inspector');
         }
 
         /** @var ?InspectorPlugin $plugin */
@@ -43,8 +42,15 @@ class ListReports extends ListRecords
     {
         return $table
             ->columns([
-                MorphModelColumn::make('inspectable.id')
-                    ->link(FilamentPageType::ViewInspection),
+                TextColumn::make('id')
+                    ->label('Type & Title')
+                    ->wrap()
+                    ->formatStateUsing(function (Report $record): string {
+                        if ($record->inspectable_type === null) {
+                            return $record->url;
+                        }
+                        return class_basename(Relation::getMorphedModel($record->inspectable_type)) . ': ' . $record->inspectable_id;
+                    }),
                 LevelColumn::make(),
                 TextColumn::make('finding_counts')
                     ->formatStateUsing(function (Report $record) {
@@ -56,11 +62,10 @@ class ListReports extends ListRecords
                         return $record->check_counts->total();
                     })
                     ->label('Checks'),
-                UpdatedAtColumn::make()
             ])
             ->filters([
-                InspectableFilter::make(),
-                LevelFilter::make(),
+//                InspectableFilter::make(),
+//                LevelFilter::make(),
             ])
             ->deferFilters(false)
             ->actions([
@@ -83,6 +88,16 @@ class ListReports extends ListRecords
     {
         return [
             BulkInspectModelAction::make(),
+            Action::make('inspect')
+                ->requiresConfirmation()
+                ->form([
+                    TextInput::make('url')
+                        ->required()
+                        ->url()
+                ])
+                ->action(function (array $data): void {
+                    resolve(InspectorService::class)->inspectUrl($data['url']);
+                })
         ];
     }
 

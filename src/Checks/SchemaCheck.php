@@ -9,17 +9,13 @@ use Throwable;
 
 class SchemaCheck extends BaseCheck
 {
+    protected string $checklist = 'SEO';
     // --- Configuration Properties ---
     protected RemarkLevel $missingLevel = RemarkLevel::ERROR;
     protected RemarkLevel $invalidJsonLevel = RemarkLevel::ERROR;
     protected RemarkLevel $validationErrorLevel = RemarkLevel::ERROR;
 
     // -----------------------------
-
-    public static function checklist(): string
-    {
-        return 'SEO';
-    }
 
     /**
      * Performs basic checks on schema.org JSON-LD scripts and optionally

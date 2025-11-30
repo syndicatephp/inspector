@@ -8,17 +8,13 @@ use Throwable;
 
 class RobotsMetaCheck extends BaseCheck
 {
+    protected string $checklist = 'SEO';
     // --- Configuration Properties ---
     protected RemarkLevel $noindexLevel = RemarkLevel::INFO;
     protected RemarkLevel $nofollowLevel = RemarkLevel::INFO;
     protected RemarkLevel $multipleLevel = RemarkLevel::ERROR;
 
     // -----------------------------
-
-    public static function checklist(): string
-    {
-        return 'SEO';
-    }
 
     /**
      * Checks the robots meta tag for 'noindex' or 'nofollow' directives.

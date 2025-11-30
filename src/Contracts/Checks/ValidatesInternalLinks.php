@@ -12,8 +12,8 @@ interface ValidatesInternalLinks
 {
     /**
      * Checks if the given path is a valid, routable path in the application.
-     * @param  string  $path
-     * @param  CheckContext  $context
+     * @param string $path
+     * @param InspectionContext $context
      * @return bool True if the path is valid, false otherwise.
      */
     public function isValid(string $path, InspectionContext $context): bool;

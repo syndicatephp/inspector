@@ -2,7 +2,6 @@
 
 namespace Syndicate\Inspector\Filament;
 
-use Closure;
 use Filament\Contracts\Plugin;
 use Filament\Panel;
 use Syndicate\Inspector\Filament\Resources\RemarkResource;
@@ -12,12 +11,6 @@ class InspectorPlugin implements Plugin
 {
     protected string $reportResource = ReportResource::class;
     protected string $remarkResource = RemarkResource::class;
-    /**
-     * @var array<int, class-string>
-     */
-    protected array $inspectableTypes = [];
-    protected ?Closure $recordTitleMapping = null;
-    protected ?Closure $recordUrlMapping = null;
 
     public static function make(): static
     {
@@ -36,15 +29,9 @@ class InspectorPlugin implements Plugin
         return $this;
     }
 
-    public function inspectableTypes(array $inspectableTypes): static
-    {
-        $this->inspectableTypes = $inspectableTypes;
-        return $this;
-    }
-
     public function getId(): string
     {
-        return 'syndicate-inspector';
+        return 'inspector';
     }
 
     public function register(Panel $panel): void
@@ -54,6 +41,7 @@ class InspectorPlugin implements Plugin
                 Widgets\RemarkLevelStats::class,
                 Widgets\ReportLevelStats::class,
             ])
+            ->discoverClusters(in: __DIR__ . '/Clusters', for: 'Syndicate\\Inspector\\Filament\\Clusters')
             ->resources([
                 $this->getReportResourceClass(),
                 $this->getRemarkResourceClass(),
@@ -68,11 +56,6 @@ class InspectorPlugin implements Plugin
     public function getRemarkResourceClass(): string
     {
         return $this->remarkResource;
-    }
-
-    public function getInspectableTypes(): array
-    {
-        return $this->inspectableTypes;
     }
 
     public function boot(Panel $panel): void

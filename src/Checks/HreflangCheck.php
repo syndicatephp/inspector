@@ -9,17 +9,13 @@ use Throwable;
 
 class HreflangCheck extends BaseCheck
 {
+    protected string $checklist = 'SEO';
     // --- Configuration Properties ---
     protected RemarkLevel $formatLevel = RemarkLevel::ERROR;
     protected RemarkLevel $relativeUrlLevel = RemarkLevel::ERROR;
     protected RemarkLevel $missingSelfReferenceLevel = RemarkLevel::WARNING;
 
     // -----------------------------
-
-    public static function checklist(): string
-    {
-        return 'SEO';
-    }
 
     /**
      * Checks for the correct implementation of hreflang link tags.

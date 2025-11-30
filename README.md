@@ -2,10 +2,11 @@
 
 ## Installation
 
-You can install the package via composer:
+Publish migrations:
 
 ```bash
-composer require syndicatephp/inspector
+php artisan vendor:publish --tag=inspector-migrations
+php artisan migrate
 ```
 
 ## Usage

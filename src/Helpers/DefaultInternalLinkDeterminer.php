@@ -10,7 +10,7 @@ class DefaultInternalLinkDeterminer implements DeterminesInternalLinks
     public function isInternal(string $href, InspectionContext $context): bool
     {
         // Get the host of the page being checked.
-        $currentHost = parse_url($context->url, PHP_URL_HOST);
+        $currentHost = parse_url($context->inspection->url(), PHP_URL_HOST);
 
         if (empty($href) || empty($currentHost)) {
             return false;

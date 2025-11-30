@@ -12,7 +12,7 @@ class ModelLevelStats extends StatsOverviewWidget
 {
     protected static ?string $pollingInterval = null;
     protected static bool $isLazy = false;
-    protected static string $view = 'syndicate::inspector.widgets.level-stats';
+    protected static string $view = 'inspector::widgets.level-stats';
     public string $inspectableType;
     public int $inspectableId;
     protected int|string|array $columnSpan = 'full';
@@ -35,7 +35,7 @@ class ModelLevelStats extends StatsOverviewWidget
         foreach (RemarkLevel::cases() as $level) {
             $figure = $statusCounts->get($level->value, 0);
             $percentage = $total === 0 ? $total : round(($figure / $total) * 100);
-            $stats[] = Stat::make($percentage.'%', $figure)
+            $stats[] = Stat::make($percentage . '%', $figure)
                 ->extraAttributes([
                     'title' => $level->getDescription(),
                 ])

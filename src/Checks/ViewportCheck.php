@@ -8,16 +8,12 @@ use Throwable;
 
 class ViewportCheck extends BaseCheck
 {
+    protected string $checklist = 'Baseline';
     // --- Configuration Properties ---
     protected RemarkLevel $missingLevel = RemarkLevel::ERROR;
     protected RemarkLevel $misconfiguredLevel = RemarkLevel::ERROR;
 
     // -----------------------------
-
-    public static function checklist(): string
-    {
-        return 'Baseline';
-    }
 
     /**
      * Checks for the presence and correct configuration of the viewport meta-tag.

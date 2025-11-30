@@ -6,10 +6,9 @@ use Filament\Facades\Filament;
 use Filament\Pages\Concerns\ExposesTableToWidgets;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Syndicate\Assistant\Enums\FilamentPageType;
-use Syndicate\Assistant\Filament\Tables\Columns\CreatedAtColumn;
-use Syndicate\Carpenter\Filament\Tables\Columns\MorphModelColumn;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Syndicate\Inspector\Filament\Actions\BulkInspectModelAction;
 use Syndicate\Inspector\Filament\InspectorPlugin;
 use Syndicate\Inspector\Filament\Resources\RemarkResource;
@@ -21,11 +20,8 @@ use Syndicate\Inspector\Filament\Tables\Columns\CheckColumn;
 use Syndicate\Inspector\Filament\Tables\Columns\ChecklistColumn;
 use Syndicate\Inspector\Filament\Tables\Columns\LevelColumn;
 use Syndicate\Inspector\Filament\Tables\Columns\MessageColumn;
-use Syndicate\Inspector\Filament\Tables\Filters\CheckFilter;
-use Syndicate\Inspector\Filament\Tables\Filters\ChecklistFilter;
-use Syndicate\Inspector\Filament\Tables\Filters\InspectableFilter;
-use Syndicate\Inspector\Filament\Tables\Filters\LevelFilter;
 use Syndicate\Inspector\Filament\Widgets\RemarkLevelStats;
+use Syndicate\Inspector\Models\Remark;
 
 class ListRemarks extends ListRecords
 {
@@ -48,19 +44,22 @@ class ListRemarks extends ListRecords
     {
         return $table
             ->columns([
-                MorphModelColumn::make('inspectable.id')
-                    ->link(FilamentPageType::ViewInspection),
+                TextColumn::make('inspectable.id')
+                    ->label('Type & Title')
+                    ->wrap()
+                    ->formatStateUsing(function (Remark $record): string {
+                        return class_basename(Relation::getMorphedModel($record->inspectable_type)) . ': ' . $record->inspectable_id;
+                    }),
                 CheckColumn::make(),
                 ChecklistColumn::make(),
                 LevelColumn::make(),
                 MessageColumn::make(),
-                CreatedAtColumn::make()
             ])
             ->filters([
-                InspectableFilter::make(),
-                LevelFilter::make(),
-                CheckFilter::make(),
-                ChecklistFilter::make(),
+//                InspectableFilter::make(),
+//                LevelFilter::make(),
+//                CheckFilter::make(),
+//                ChecklistFilter::make(),
             ])
             ->deferFilters(false)
             ->actions([

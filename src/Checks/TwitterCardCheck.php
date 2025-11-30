@@ -9,6 +9,7 @@ use Throwable;
 
 class TwitterCardCheck extends BaseCheck
 {
+    protected string $checklist = 'SEO';
     // --- Configuration Properties ---
     protected RemarkLevel $missingRequiredLevel = RemarkLevel::WARNING;
     protected RemarkLevel $validationLevel = RemarkLevel::WARNING;
@@ -16,11 +17,6 @@ class TwitterCardCheck extends BaseCheck
 
     /** The properties that are considered essential for a basic Twitter Card. */
     protected array $requiredProperties = ['twitter:card', 'twitter:title', 'twitter:description', 'twitter:image'];
-
-    public static function checklist(): string
-    {
-        return 'SEO';
-    }
 
     protected function applyCheck(): CheckResult
     {

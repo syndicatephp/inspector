@@ -8,6 +8,7 @@ use Throwable;
 
 class MetaDescriptionCheck extends BaseCheck
 {
+    protected string $checklist = 'SEO';
     // --- Configuration Properties ---
     protected ?int $minDescriptionLength = 50;
     protected ?int $maxDescriptionLength = 160;
@@ -18,11 +19,6 @@ class MetaDescriptionCheck extends BaseCheck
     protected RemarkLevel $multipleLevel = RemarkLevel::ERROR;
 
     // -----------------------------
-
-    public static function checklist(): string
-    {
-        return 'SEO';
-    }
 
     /**
      * Check for the presence, uniqueness, and quality of the <meta name="description"> tag.

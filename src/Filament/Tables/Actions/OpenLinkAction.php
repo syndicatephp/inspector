@@ -4,6 +4,7 @@ namespace Syndicate\Inspector\Filament\Tables\Actions;
 
 use Filament\Tables\Actions\ViewAction;
 use Syndicate\Inspector\Models\Remark;
+use Syndicate\Inspector\Models\Report;
 
 class OpenLinkAction extends ViewAction
 {
@@ -20,7 +21,7 @@ class OpenLinkAction extends ViewAction
             ->icon('heroicon-o-arrow-top-right-on-square')
             ->color('info')
             ->label('Open')
-            ->url(function (Remark $record): string {
+            ->url(function (Remark|Report $record): string {
                 return $record->url;
             }, shouldOpenInNewTab: true);
     }

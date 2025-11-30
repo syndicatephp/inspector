@@ -5,20 +5,14 @@ namespace Syndicate\Inspector\Filament\Pages;
 use Filament\Resources\Pages\ManageRelatedRecords;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Syndicate\Assistant\Filament\Tables\Columns\CreatedAtColumn;
-use Syndicate\Inspector\Filament\Actions\InspectModelAction;
 use Syndicate\Inspector\Filament\Actions\ClearInspectionAction;
+use Syndicate\Inspector\Filament\Actions\InspectModelAction;
 use Syndicate\Inspector\Filament\Tables\Actions\OpenLinkAction;
 use Syndicate\Inspector\Filament\Tables\Actions\ViewRemarkAction;
 use Syndicate\Inspector\Filament\Tables\Columns\CheckColumn;
 use Syndicate\Inspector\Filament\Tables\Columns\ChecklistColumn;
 use Syndicate\Inspector\Filament\Tables\Columns\LevelColumn;
 use Syndicate\Inspector\Filament\Tables\Columns\MessageColumn;
-use Syndicate\Inspector\Filament\Tables\Filters\CheckFilter;
-use Syndicate\Inspector\Filament\Tables\Filters\ChecklistFilter;
-use Syndicate\Inspector\Filament\Tables\Filters\LevelFilter;
-use Syndicate\Teacher\Filament\Actions\WikiAction;
-use Syndicate\Teacher\Entries\ViewInspectionEntry;
 
 class ViewInspection extends ManageRelatedRecords
 {
@@ -37,12 +31,11 @@ class ViewInspection extends ManageRelatedRecords
                 ChecklistColumn::make(),
                 LevelColumn::make(),
                 MessageColumn::make(),
-                CreatedAtColumn::make()
             ])
             ->filters([
-                LevelFilter::make(),
-                CheckFilter::make(),
-                ChecklistFilter::make(),
+//                LevelFilter::make(),
+//                CheckFilter::make(),
+//                ChecklistFilter::make(),
             ])
             ->deferFilters(false)
             ->actions([
@@ -76,7 +69,6 @@ class ViewInspection extends ManageRelatedRecords
         return [
             InspectModelAction::make(),
             ClearInspectionAction::make(),
-            WikiAction::make()->entry(new ViewInspectionEntry()),
         ];
     }
 }

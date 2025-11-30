@@ -10,6 +10,7 @@ use Throwable;
 
 class OpenGraphCheck extends BaseCheck
 {
+    protected string $checklist = 'SEO';
     // --- Configuration Properties ---
     protected RemarkLevel $missingRequiredLevel = RemarkLevel::ERROR;
     protected RemarkLevel $missingRecommendedLevel = RemarkLevel::WARNING;
@@ -41,11 +42,6 @@ class OpenGraphCheck extends BaseCheck
     ];
 
     // -----------------------------
-
-    public static function checklist(): string
-    {
-        return 'SEO';
-    }
 
     protected function applyCheck(): CheckResult
     {

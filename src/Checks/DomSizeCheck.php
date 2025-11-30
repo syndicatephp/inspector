@@ -8,17 +8,13 @@ use Throwable;
 
 class DomSizeCheck extends BaseCheck
 {
+    protected string $checklist = 'Performance';
     // --- Configuration Properties ---
     protected int $noticeThreshold = 1000;
     protected int $warningThreshold = 2000;
     protected int $errorThreshold = 3000;
 
     // -----------------------------
-
-    public static function checklist(): string
-    {
-        return 'Performance';
-    }
 
     /**
      * Check the overall dom size of the page.

@@ -9,15 +9,11 @@ use Throwable;
 
 class MixedContentCheck extends BaseCheck
 {
+    protected string $checklist = 'Baseline';
     // --- Configuration Properties ---
     protected RemarkLevel $level = RemarkLevel::ERROR;
 
     // -----------------------------
-
-    public static function checklist(): string
-    {
-        return 'Baseline';
-    }
 
     /**
      * Scans for insecurely loaded assets on a secure page.
